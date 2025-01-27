@@ -20,8 +20,8 @@ This project is a simple Pomodoro Timer application built using Python's `tkinte
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/pomodoro-timer.git
-   cd pomodoro-timer
+   git clone https://github.com/NateRolo/Pomodoro-Timer-Python.git
+   cd Pomodoro-Timer-Python
    ```
 
 2. Run the GUI version:
