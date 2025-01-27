@@ -1,6 +1,8 @@
 import tkinter as tk
 from tkinter import messagebox, ttk
 from threading import Timer
+from pynput import keyboard, mouse
+import threading
 
 # Default durations moved to class for customization
 class PomodoroApp:
@@ -10,7 +12,9 @@ class PomodoroApp:
         """
         self.master = master
         self.master.title("Pomodoro Timer")
-        self.master.geometry("400x500")  # Increased height for new controls
+        self.master.geometry("400x500")  
+        self.input_blocked = False
+        self.failsafe_triggered = False
 
         # Default timer settings
         self.work_duration = 25
