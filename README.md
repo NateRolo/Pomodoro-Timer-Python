@@ -15,6 +15,7 @@ This project is a simple Pomodoro Timer application built using Python's `tkinte
 
 - Python 3.x
 - `tkinter` library (usually included with Python installations)
+- `pynput` library (can be installed from pip)
 
 ### Installation
 
