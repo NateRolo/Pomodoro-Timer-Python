@@ -86,6 +86,14 @@ class PomodoroApp:
         self.reset_button = ttk.Button(button_frame, text="Reset", command=self.reset_timer, width=10)
         self.reset_button.pack(side=tk.LEFT, padx=5)
 
+        # Add test button (for development/testing only)
+        self.test_button = ttk.Button(
+            self.master, 
+            text="Test Input Block (5s)", 
+            command=self.test_input_blocking
+        )
+        self.test_button.pack(pady=5)
+
         self.update_timer_display()
 
     def apply_settings(self):
@@ -260,6 +268,13 @@ class PomodoroApp:
             self.block_keyboard_listener.stop()
         if hasattr(self, 'mouse_listener'):
             self.mouse_listener.stop()
+
+    def test_input_blocking(self):
+        """
+        Test input blocking for 5 seconds
+        """
+        self.block_inputs()
+        self.master.after(5000, self.unblock_inputs)  # Automatically unblock after 5 seconds
 
 if __name__ == "__main__":
     root = tk.Tk()
