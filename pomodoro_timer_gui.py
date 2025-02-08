@@ -220,6 +220,28 @@ class PomodoroApp:
         mins, secs = divmod(self.current_time, 60)
         self.time_display.config(text=f"{mins:02d}:{secs:02d}")
 
+    def block_inputs(self):
+        """
+        Block keyboard and mouse inputs during break phases.
+        """
+        self.input_blocked = True
+        self.keyboard_listener = keyboard.Listener(suppress=True)
+        self.mouse_listener = mouse.Listener(suppress=True)
+        
+        # Start the listeners
+        self.keyboard_listener.start()
+        self.mouse_listener.start()
+
+    def unblock_inputs(self):
+        """
+        Unblock keyboard and mouse inputs.
+        """
+        self.input_blocked = False
+        if hasattr(self, 'keyboard_listener'):
+            self.keyboard_listener.stop()
+        if hasattr(self, 'mouse_listener'):
+            self.mouse_listener.stop()
+
 if __name__ == "__main__":
     root = tk.Tk()
     app = PomodoroApp(root)
