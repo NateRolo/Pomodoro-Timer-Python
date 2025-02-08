@@ -177,6 +177,20 @@ class PomodoroApp:
             self.set_timer()
             self.update_timer_display()
 
+    def show_password_dialog(self):
+        """
+        Show a password dialog to unlock the system during breaks.
+        """
+        dialog = tk.Toplevel(self.master)
+        dialog.title("Unlock System")
+        dialog.geometry("300x150")
+        dialog.transient(self.master)
+
+        ttk.Label(dialog, text="Enter password to unlock:").pack(pady=10)
+        password_entry = ttk.Entry(dialog, show="*")
+        password_entry.pack(pady=10)
+    
+
     def update_timer_display(self):
         """
         Update the timer display with the current time.
