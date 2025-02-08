@@ -81,6 +81,11 @@ class PomodoroApp:
 
         self.time_display = tk.Label(self.master, text="00:00", font=("Helvetica", 36), fg="red")
         self.time_display.pack(pady=20)
+        
+        # --- Input Status Label ---
+        # This label shows a message when inputs are blocked.
+        self.input_status_label = tk.Label(self.master, text="", font=("Helvetica", 12), fg="blue")
+        self.input_status_label.pack(pady=5)
 
         # --- Control Buttons ---
         button_frame = ttk.Frame(self.master)
@@ -214,6 +219,8 @@ class PomodoroApp:
         )
 
         self.input_blocked = True
+        # Update the UI status label.
+        self.input_status_label.config(text="Inputs are blocked during break timer.")
 
         # Create a custom keyboard listener that suppresses all keys
         # but checks for the failsafe combination (Ctrl+Alt+U) manually.
@@ -257,6 +264,8 @@ class PomodoroApp:
 
     def unblock_inputs(self):
         self.input_blocked = False
+        # Clear the UI status label.
+        self.input_status_label.config(text="")
         if hasattr(self, 'block_keyboard_listener'):
             self.block_keyboard_listener.stop()
         if hasattr(self, 'mouse_listener'):
