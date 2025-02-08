@@ -33,8 +33,8 @@ class PomodoroApp:
         # keyboard listener for master failsafe
         self.keyboard_listener = keyboard.GlobalHotKeys({
         '<ctrl>+<alt>+u': self.show_password_dialog
-    })
-    self.keyboard_listener.start()
+        })
+        self.keyboard_listener.start()
 
     def setup_ui(self):
         """
