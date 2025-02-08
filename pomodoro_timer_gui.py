@@ -173,13 +173,15 @@ class PomodoroApp:
             messagebox.showinfo("Timer Complete", f"{self.current_phase} phase starting!")
             self.block_inputs()
         else:
+            # Unblock inputs first when transitioning from break to work
             self.unblock_inputs()
             self.current_phase = "Work"
             messagebox.showinfo("Timer Complete", f"{self.current_phase} phase starting!")
-            
 
         if self.cycle_count == 4 and self.current_phase == "Long Break":
             messagebox.showinfo("Pomodoro Complete", "You've completed 4 Pomodoro cycles!")
+            # Make sure inputs are unblocked when resetting
+            self.unblock_inputs()
             self.reset_timer()
         else:
             self.set_timer()
