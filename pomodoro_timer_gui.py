@@ -185,11 +185,23 @@ class PomodoroApp:
         dialog.title("Unlock System")
         dialog.geometry("300x150")
         dialog.transient(self.master)
+        dialog.lift()
 
         ttk.Label(dialog, text="Enter password to unlock:").pack(pady=10)
         password_entry = ttk.Entry(dialog, show="*")
         password_entry.pack(pady=10)
-    
+        password_entry.focus()
+
+        def check_password():
+            if password_entry.get() == "password":
+                self.unlock_inputs()
+                dialog.destroy()
+            else:
+                messagebox.showerror("Error", "Incorrect password")
+
+        ttk.Button(dialog, text="Unlock", command=check_password).pack(pady=10)
+
+        dialog.bind('<Return>', lambda e: check_password())
 
     def update_timer_display(self):
         """
