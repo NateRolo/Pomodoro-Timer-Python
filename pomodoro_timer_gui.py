@@ -162,16 +162,27 @@ class PomodoroApp:
         self.update_timer_display()
         self.start_timer()
 
+    def pause_input_blocking(self):
+        """Temporarily stop the blocking keyboard and mouse listeners without changing the input_blocked flag."""
+        if hasattr(self, 'block_keyboard_listener'):
+            self.block_keyboard_listener.stop()
+        if hasattr(self, 'mouse_listener'):
+            self.mouse_listener.stop()
+
     def show_password_dialog(self):
         # Only show the dialog if inputs are currently blocked.
         if not self.input_blocked:
             return
+
+        # Temporarily stop the blocking listeners so the dialog can receive input.
+        self.pause_input_blocking()
 
         dialog = tk.Toplevel(self.master)
         dialog.title("Unlock System")
         dialog.geometry("300x150")
         dialog.transient(self.master)
         dialog.lift()
+        dialog.grab_set()  # Make the dialog modal
 
         ttk.Label(dialog, text="Enter password to unlock:").pack(pady=10)
         password_entry = ttk.Entry(dialog, show="*")
@@ -180,13 +191,16 @@ class PomodoroApp:
 
         def check_password():
             if password_entry.get() == "password":
-                self.unblock_inputs()
+                self.unblock_inputs()  # Permanently unlock inputs
                 dialog.destroy()
             else:
                 messagebox.showerror("Error", "Incorrect password")
 
         ttk.Button(dialog, text="Unlock", command=check_password).pack(pady=10)
         dialog.bind('<Return>', lambda e: check_password())
+        # If the user closes the dialog without entering the correct password,
+        # re-enable the blocking listeners.
+        dialog.protocol("WM_DELETE_WINDOW", lambda: (self.block_inputs(), dialog.destroy()))
 
     def update_timer_display(self):
         mins, secs = divmod(self.current_time, 60)
