@@ -164,8 +164,10 @@ class PomodoroApp:
         if self.current_phase == "Work":
             self.cycle_count += 1
             self.current_phase = "Short Break" if self.cycle_count < 4 else "Long Break"
+            self.block_inputs()
         else:
             self.current_phase = "Work"
+            self.unblock_inputs()
 
         if self.cycle_count == 4 and self.current_phase == "Long Break":
             messagebox.showinfo("Pomodoro Complete", "You've completed 4 Pomodoro cycles!")
