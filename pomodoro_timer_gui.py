@@ -9,6 +9,10 @@ class PomodoroApp:
         self.master.geometry("400x500")
         self.input_blocked = False
 
+        # Toggle for enabling/disabling input blocking (default is enabled)
+        self.input_blocking_enabled = True
+        self.input_blocking_var = tk.BooleanVar(value=True)
+
         # Default timer settings (in minutes)
         self.work_duration = 25
         self.short_break_duration = 5
@@ -20,15 +24,32 @@ class PomodoroApp:
         self.running = False
         self.cycle_count = 0
 
-        # Setup the UI components
+        # Setup UI components and menu
         self.setup_ui()
+        self.setup_menu()
 
         # Global failsafe listener that is always running.
-        # It listens for Ctrl+Alt+U when inputs are not blocked.
         self.failsafe_listener = keyboard.GlobalHotKeys({
             '<ctrl>+<alt>+u': self.show_password_dialog
         })
         self.failsafe_listener.start()
+
+    def setup_menu(self):
+        menu_bar = tk.Menu(self.master)
+        self.master.config(menu=menu_bar)
+        options_menu = tk.Menu(menu_bar, tearoff=0)
+        menu_bar.add_cascade(label="Options", menu=options_menu)
+        options_menu.add_checkbutton(
+            label="Enable Input Blocking",
+            variable=self.input_blocking_var,
+            command=self.toggle_input_blocking
+        )
+
+    def toggle_input_blocking(self):
+        self.input_blocking_enabled = self.input_blocking_var.get()
+        if not self.input_blocking_enabled:
+            # If the user turns off input blocking, immediately unblock any active blockers.
+            self.unblock_inputs()
 
     def setup_ui(self):
         # --- Settings Frame ---
@@ -207,6 +228,10 @@ class PomodoroApp:
         self.time_display.config(text=f"{mins:02d}:{secs:02d}")
 
     def block_inputs(self):
+        # Only block inputs if the toggle is enabled.
+        if not self.input_blocking_enabled:
+            return
+
         # Inform the user before blocking input.
         messagebox.showwarning(
             "Input Blocking",
@@ -248,7 +273,7 @@ class PomodoroApp:
         self.block_keyboard_listener = keyboard.Listener(
             on_press=block_on_press,
             on_release=block_on_release,
-            suppress=True  # This blocks all key events from reaching other apps.
+            suppress=True  # Blocks all key events from reaching other apps.
         )
         self.block_keyboard_listener.start()
 
