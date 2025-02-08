@@ -1,79 +1,66 @@
 import tkinter as tk
 from tkinter import messagebox, ttk
-from threading import Timer
 from pynput import keyboard, mouse
-import threading
 
-# Default durations moved to class for customization
 class PomodoroApp:
     def __init__(self, master):
-        """
-        Initialize the Pomodoro Timer application.
-        """
         self.master = master
         self.master.title("Pomodoro Timer")
-        self.master.geometry("400x500")  
+        self.master.geometry("400x500")
         self.input_blocked = False
-        self.failsafe_triggered = False
 
-        # Default timer settings
+        # Default timer settings (in minutes)
         self.work_duration = 25
         self.short_break_duration = 5
         self.long_break_duration = 15
 
-        # Timer settings
+        # Timer state
         self.current_time = 0
         self.current_phase = "Work"
         self.running = False
         self.cycle_count = 0
 
-        # UI components
+        # Setup the UI components
         self.setup_ui()
 
-        # keyboard listener for master failsafe
-        self.keyboard_listener = keyboard.GlobalHotKeys({
-        '<ctrl>+<alt>+u': self.show_password_dialog
+        # Global failsafe listener that is always running.
+        # It listens for Ctrl+Alt+U when inputs are not blocked.
+        self.failsafe_listener = keyboard.GlobalHotKeys({
+            '<ctrl>+<alt>+u': self.show_password_dialog
         })
-        self.keyboard_listener.start()
+        self.failsafe_listener.start()
 
     def setup_ui(self):
-        """
-        Set up the user interface components.
-        """
-        # Settings Frame
+        # --- Settings Frame ---
         settings_frame = ttk.LabelFrame(self.master, text="Timer Settings (minutes)", padding=10)
         settings_frame.pack(pady=10, padx=10, fill="x")
 
-        # Work Duration
         ttk.Label(settings_frame, text="Work Duration:").grid(row=0, column=0, padx=5, pady=5)
         self.work_entry = ttk.Entry(settings_frame, width=10)
         self.work_entry.insert(0, str(self.work_duration))
         self.work_entry.grid(row=0, column=1, padx=5, pady=5)
 
-        # Short Break Duration
         ttk.Label(settings_frame, text="Short Break:").grid(row=1, column=0, padx=5, pady=5)
         self.short_break_entry = ttk.Entry(settings_frame, width=10)
         self.short_break_entry.insert(0, str(self.short_break_duration))
         self.short_break_entry.grid(row=1, column=1, padx=5, pady=5)
 
-        # Long Break Duration
         ttk.Label(settings_frame, text="Long Break:").grid(row=2, column=0, padx=5, pady=5)
         self.long_break_entry = ttk.Entry(settings_frame, width=10)
         self.long_break_entry.insert(0, str(self.long_break_duration))
         self.long_break_entry.grid(row=2, column=1, padx=5, pady=5)
 
-        # Apply Settings Button
         apply_button = ttk.Button(settings_frame, text="Apply Settings", command=self.apply_settings)
         apply_button.grid(row=3, column=0, columnspan=2, pady=10)
 
-        # Timer Display
+        # --- Timer Display ---
         self.timer_label = tk.Label(self.master, text="Pomodoro Timer", font=("Helvetica", 18))
         self.timer_label.pack(pady=20)
 
         self.time_display = tk.Label(self.master, text="00:00", font=("Helvetica", 36), fg="red")
         self.time_display.pack(pady=20)
 
-        # Control buttons
+        # --- Control Buttons ---
         button_frame = ttk.Frame(self.master)
         button_frame.pack(pady=10)
 
@@ -86,20 +73,13 @@ class PomodoroApp:
         self.reset_button = ttk.Button(button_frame, text="Reset", command=self.reset_timer, width=10)
         self.reset_button.pack(side=tk.LEFT, padx=5)
 
-        # Add test button (for development/testing only)
-        self.test_button = ttk.Button(
-            self.master, 
-            text="Test Input Block (5s)", 
-            command=self.test_input_blocking
-        )
+        # Test button (for development/testing only)
+        self.test_button = ttk.Button(self.master, text="Test Input Block (5s)", command=self.test_input_blocking)
         self.test_button.pack(pady=5)
 
         self.update_timer_display()
 
     def apply_settings(self):
-        """
-        Validate and apply new timer settings.
-        """
         try:
             new_work = int(self.work_entry.get())
             new_short = int(self.short_break_entry.get())
@@ -112,7 +92,6 @@ class PomodoroApp:
             self.short_break_duration = new_short
             self.long_break_duration = new_long
 
-            # Reset timer if it's not running
             if not self.running:
                 self.reset_timer()
 
@@ -121,9 +100,6 @@ class PomodoroApp:
             messagebox.showerror("Error", "Please enter valid positive numbers for all durations")
 
     def start_timer(self):
-        """
-        Start or resume the Pomodoro timer.
-        """
         if not self.running:
             self.running = True
             if self.current_time == 0:
@@ -131,15 +107,9 @@ class PomodoroApp:
             self.run_timer()
 
     def pause_timer(self):
-        """
-        Pause the Pomodoro timer.
-        """
         self.running = False
 
     def reset_timer(self):
-        """
-        Reset the Pomodoro timer.
-        """
         self.running = False
         self.current_time = 0
         self.cycle_count = 0
@@ -147,9 +117,6 @@ class PomodoroApp:
         self.update_timer_display()
 
     def set_timer(self):
-        """
-        Set the timer duration based on the current phase.
-        """
         phase_durations = {
             "Work": self.work_duration * 60,
             "Short Break": self.short_break_duration * 60,
@@ -158,9 +125,6 @@ class PomodoroApp:
         self.current_time = phase_durations.get(self.current_phase, self.work_duration * 60)
 
     def run_timer(self):
-        """
-        Run the Pomodoro timer countdown.
-        """
         if self.running and self.current_time > 0:
             mins, secs = divmod(self.current_time, 60)
             self.time_display.config(text=f"{mins:02d}:{secs:02d}")
@@ -170,37 +134,36 @@ class PomodoroApp:
             self.switch_phase()
 
     def switch_phase(self):
-        """
-        Switch to the next phase of the Pomodoro cycle.
-        """
         self.running = False
+        previous_phase = self.current_phase  # Remember the phase that just ended
 
         if self.current_phase == "Work":
             self.cycle_count += 1
-            self.current_phase = "Short Break" if self.cycle_count < 4 else "Long Break"
-            messagebox.showinfo("Timer Complete", f"{self.current_phase} phase starting!")
-            self.block_inputs()
+            if self.cycle_count < 4:
+                self.current_phase = "Short Break"
+                messagebox.showinfo("Timer Complete", "Short Break phase starting!")
+                self.block_inputs()
+            else:
+                self.current_phase = "Long Break"
+                messagebox.showinfo("Timer Complete", "Long Break phase starting!")
+                self.block_inputs()
         else:
-            # Unblock inputs first when transitioning from break to work
+            # End of a break phase: unblock inputs first.
             self.unblock_inputs()
-            self.current_phase = "Work"
-            messagebox.showinfo("Timer Complete", f"{self.current_phase} phase starting!")
+            if previous_phase == "Long Break":
+                messagebox.showinfo("Pomodoro Complete", "You've completed 4 Pomodoro cycles!")
+                self.reset_timer()
+                return  # Do not restart a new work session immediately.
+            else:
+                self.current_phase = "Work"
+                messagebox.showinfo("Timer Complete", "Work phase starting!")
 
-        if self.cycle_count == 4 and self.current_phase == "Long Break":
-            messagebox.showinfo("Pomodoro Complete", "You've completed 4 Pomodoro cycles!")
-            # Make sure inputs are unblocked when resetting
-            self.unblock_inputs()
-            self.reset_timer()
-        else:
-            self.set_timer()
-            self.update_timer_display()
-            self.start_timer()
+        self.set_timer()
+        self.update_timer_display()
+        self.start_timer()
 
     def show_password_dialog(self):
-        """
-        Show a password dialog to unlock the system during breaks.
-        Master failsafe triggered with Ctrl+Alt+U
-        """
+        # Only show the dialog if inputs are currently blocked.
         if not self.input_blocked:
             return
 
@@ -223,46 +186,63 @@ class PomodoroApp:
                 messagebox.showerror("Error", "Incorrect password")
 
         ttk.Button(dialog, text="Unlock", command=check_password).pack(pady=10)
-
         dialog.bind('<Return>', lambda e: check_password())
 
     def update_timer_display(self):
-        """
-        Update the timer display with the current time.
-        """
         mins, secs = divmod(self.current_time, 60)
         self.time_display.config(text=f"{mins:02d}:{secs:02d}")
 
     def block_inputs(self):
-        """
-        Block keyboard and mouse inputs during break phases.
-        """
-        # Show warning message before blocking inputs
+        # Inform the user before blocking input.
         messagebox.showwarning(
             "Input Blocking",
-            "Your keyboard and mouse inputs will be blocked during the break.\n\n" +
+            "Your keyboard and mouse inputs will be blocked during the break.\n\n"
             "To regain control, use the master failsafe: Ctrl+Alt+U"
         )
-        
+
         self.input_blocked = True
-        if hasattr(self, 'keyboard_listener'):
-            self.keyboard_listener.stop()
-        
-        # Create new listeners for blocking
-        self.block_keyboard_listener = keyboard.Listener(suppress=True)
-        self.mouse_listener = mouse.Listener(suppress=True)
-        
-        # Start the listeners
+
+        # Create a custom keyboard listener that suppresses all keys
+        # but checks for the failsafe combination (Ctrl+Alt+U) manually.
+        self.block_pressed_keys = set()
+
+        def block_on_press(key):
+            try:
+                self.block_pressed_keys.add(key)
+                ctrl_pressed = any(k in (keyboard.Key.ctrl, keyboard.Key.ctrl_l, keyboard.Key.ctrl_r)
+                                   for k in self.block_pressed_keys)
+                alt_pressed = any(k in (keyboard.Key.alt, keyboard.Key.alt_l, keyboard.Key.alt_r)
+                                  for k in self.block_pressed_keys)
+                u_pressed = any(
+                    isinstance(k, keyboard.KeyCode) and k.char and k.char.lower() == 'u'
+                    for k in self.block_pressed_keys
+                )
+                if ctrl_pressed and alt_pressed and u_pressed:
+                    # Failsafe combination detected.
+                    self.show_password_dialog()
+                    self.block_pressed_keys.clear()
+            except Exception as e:
+                print("Error in block_on_press:", e)
+
+        def block_on_release(key):
+            try:
+                if key in self.block_pressed_keys:
+                    self.block_pressed_keys.remove(key)
+            except Exception as e:
+                print("Error in block_on_release:", e)
+
+        self.block_keyboard_listener = keyboard.Listener(
+            on_press=block_on_press,
+            on_release=block_on_release,
+            suppress=True  # This blocks all key events from reaching other apps.
+        )
         self.block_keyboard_listener.start()
+
+        # Create a mouse listener that suppresses mouse input.
+        self.mouse_listener = mouse.Listener(suppress=True)
         self.mouse_listener.start()
-        
-        # Restart the failsafe listener
-        self.keyboard_listener.start()
 
     def unblock_inputs(self):
-        """
-        Unblock keyboard and mouse inputs.
-        """
         self.input_blocked = False
         if hasattr(self, 'block_keyboard_listener'):
             self.block_keyboard_listener.stop()
@@ -270,9 +250,6 @@ class PomodoroApp:
             self.mouse_listener.stop()
 
     def test_input_blocking(self):
-        """
-        Test input blocking for 5 seconds
-        """
         self.block_inputs()
         self.master.after(5000, self.unblock_inputs)  # Automatically unblock after 5 seconds
 
@@ -280,4 +257,3 @@ if __name__ == "__main__":
     root = tk.Tk()
     app = PomodoroApp(root)
     root.mainloop()
-    
