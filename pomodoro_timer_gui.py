@@ -235,20 +235,27 @@ class PomodoroApp:
         )
         
         self.input_blocked = True
-        self.keyboard_listener = keyboard.Listener(suppress=True)
+        if hasattr(self, 'keyboard_listener'):
+            self.keyboard_listener.stop()
+        
+        # Create new listeners for blocking
+        self.block_keyboard_listener = keyboard.Listener(suppress=True)
         self.mouse_listener = mouse.Listener(suppress=True)
         
         # Start the listeners
-        self.keyboard_listener.start()
+        self.block_keyboard_listener.start()
         self.mouse_listener.start()
+        
+        # Restart the failsafe listener
+        self.keyboard_listener.start()
 
     def unblock_inputs(self):
         """
         Unblock keyboard and mouse inputs.
         """
         self.input_blocked = False
-        if hasattr(self, 'keyboard_listener'):
-            self.keyboard_listener.stop()
+        if hasattr(self, 'block_keyboard_listener'):
+            self.block_keyboard_listener.stop()
         if hasattr(self, 'mouse_listener'):
             self.mouse_listener.stop()
 
