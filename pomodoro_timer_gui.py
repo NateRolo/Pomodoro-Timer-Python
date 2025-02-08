@@ -4,11 +4,14 @@ from pynput import keyboard, mouse
 
 """
 2/8/2025
-Nathan
 
 Currently working on reset button, doesn't function as intended(starts new break instead of set app to neutral state).
 
 Next steps are to add cancel buttons to dialogue windows that appear when break timer is starting.
+
+After reset button is resolved, will switch branch to work on future updates.
+
+Nathan
 """
 
 class PomodoroApp:
