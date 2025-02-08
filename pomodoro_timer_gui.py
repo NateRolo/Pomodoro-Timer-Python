@@ -141,6 +141,7 @@ class PomodoroApp:
         self.current_time = 0
         self.cycle_count = 0
         self.current_phase = "Work"
+        self.unblock_inputs()
         self.update_timer_display()
 
     def set_timer(self):
@@ -190,14 +191,18 @@ class PomodoroApp:
         self.start_timer()
 
     def pause_input_blocking(self):
-        """Temporarily stop the blocking keyboard and mouse listeners without changing the input_blocked flag."""
+        """
+        Temporarily stop the blocking keyboard and mouse listeners without changing the input_blocked flag.
+        """
         if hasattr(self, 'block_keyboard_listener'):
             self.block_keyboard_listener.stop()
         if hasattr(self, 'mouse_listener'):
             self.mouse_listener.stop()
 
     def failsafe_restore(self):
-        """Restore input immediately when failsafe combination is pressed and notify the user."""
+        """
+        Restore input immediately when failsafe combination is pressed and notify the user.
+        """
         if self.input_blocked:
             self.unblock_inputs()
             messagebox.showinfo("Input Restored", "Input blocking has been disabled and inputs restored.")
