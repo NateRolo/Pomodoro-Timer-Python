@@ -227,6 +227,13 @@ class PomodoroApp:
         """
         Block keyboard and mouse inputs during break phases.
         """
+        # Show warning message before blocking inputs
+        messagebox.showwarning(
+            "Input Blocking",
+            "Your keyboard and mouse inputs will be blocked during the break.\n\n" +
+            "To regain control, use the master failsafe: Ctrl+Alt+U"
+        )
+        
         self.input_blocked = True
         self.keyboard_listener = keyboard.Listener(suppress=True)
         self.mouse_listener = mouse.Listener(suppress=True)
