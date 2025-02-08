@@ -170,16 +170,17 @@ class PomodoroApp:
         if self.current_phase == "Work":
             self.cycle_count += 1
             self.current_phase = "Short Break" if self.cycle_count < 4 else "Long Break"
+            messagebox.showinfo("Timer Complete", f"{self.current_phase} phase starting!")
             self.block_inputs()
         else:
             self.current_phase = "Work"
+            messagebox.showinfo("Timer Complete", f"{self.current_phase} phase starting!")
             self.unblock_inputs()
 
         if self.cycle_count == 4 and self.current_phase == "Long Break":
             messagebox.showinfo("Pomodoro Complete", "You've completed 4 Pomodoro cycles!")
             self.reset_timer()
         else:
-            messagebox.showinfo("Timer Complete", f"{self.current_phase} phase starting!")
             self.set_timer()
             self.update_timer_display()
 
@@ -204,7 +205,7 @@ class PomodoroApp:
 
         def check_password():
             if password_entry.get() == "password":
-                self.unlock_inputs()
+                self.unblock_inputs()
                 dialog.destroy()
             else:
                 messagebox.showerror("Error", "Incorrect password")
