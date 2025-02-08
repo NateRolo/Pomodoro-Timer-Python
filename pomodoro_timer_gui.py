@@ -30,6 +30,12 @@ class PomodoroApp:
         # UI components
         self.setup_ui()
 
+        # keyboard listener for master failsafe
+        self.keyboard_listener = keyboard.GlobalHotKeys({
+        '<ctrl>+<alt>+u': self.show_password_dialog
+    })
+    self.keyboard_listener.start()
+
     def setup_ui(self):
         """
         Set up the user interface components.
@@ -180,7 +186,11 @@ class PomodoroApp:
     def show_password_dialog(self):
         """
         Show a password dialog to unlock the system during breaks.
+        Master failsafe triggered with Ctrl+Alt+U
         """
+        if not self.input_blocked:
+            return
+
         dialog = tk.Toplevel(self.master)
         dialog.title("Unlock System")
         dialog.geometry("300x150")
