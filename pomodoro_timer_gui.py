@@ -29,8 +29,9 @@ class PomodoroApp:
         self.setup_menu()
 
         # Global failsafe listener that is always running.
+        # It listens for Ctrl+Alt+U to restore inputs.
         self.failsafe_listener = keyboard.GlobalHotKeys({
-            '<ctrl>+<alt>+u': self.show_password_dialog
+            '<ctrl>+<alt>+u': self.failsafe_restore
         })
         self.failsafe_listener.start()
 
@@ -190,38 +191,11 @@ class PomodoroApp:
         if hasattr(self, 'mouse_listener'):
             self.mouse_listener.stop()
 
-    def show_password_dialog(self):
-        # Only show the dialog if inputs are currently blocked.
-        if not self.input_blocked:
-            return
-
-        # Temporarily stop the blocking listeners so the dialog can receive input.
-        self.pause_input_blocking()
-
-        dialog = tk.Toplevel(self.master)
-        dialog.title("Unlock System")
-        dialog.geometry("300x150")
-        dialog.transient(self.master)
-        dialog.lift()
-        dialog.grab_set()  # Make the dialog modal
-
-        ttk.Label(dialog, text="Enter password to unlock:").pack(pady=10)
-        password_entry = ttk.Entry(dialog, show="*")
-        password_entry.pack(pady=10)
-        password_entry.focus()
-
-        def check_password():
-            if password_entry.get() == "password":
-                self.unblock_inputs()  # Permanently unlock inputs
-                dialog.destroy()
-            else:
-                messagebox.showerror("Error", "Incorrect password")
-
-        ttk.Button(dialog, text="Unlock", command=check_password).pack(pady=10)
-        dialog.bind('<Return>', lambda e: check_password())
-        # If the user closes the dialog without entering the correct password,
-        # re-enable the blocking listeners.
-        dialog.protocol("WM_DELETE_WINDOW", lambda: (self.block_inputs(), dialog.destroy()))
+    def failsafe_restore(self):
+        """Restore input immediately when failsafe combination is pressed and notify the user."""
+        if self.input_blocked:
+            self.unblock_inputs()
+            messagebox.showinfo("Input Restored", "Input blocking has been disabled and inputs restored.")
 
     def update_timer_display(self):
         mins, secs = divmod(self.current_time, 60)
@@ -236,7 +210,7 @@ class PomodoroApp:
         messagebox.showwarning(
             "Input Blocking",
             "Your keyboard and mouse inputs will be blocked during the break.\n\n"
-            "To regain control, use the master failsafe: Ctrl+Alt+U"
+            "To regain control, press Ctrl+Alt+U."
         )
 
         self.input_blocked = True
@@ -258,7 +232,7 @@ class PomodoroApp:
                 )
                 if ctrl_pressed and alt_pressed and u_pressed:
                     # Failsafe combination detected.
-                    self.show_password_dialog()
+                    self.failsafe_restore()
                     self.block_pressed_keys.clear()
             except Exception as e:
                 print("Error in block_on_press:", e)
